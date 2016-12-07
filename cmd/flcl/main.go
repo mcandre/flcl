@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 
 	"github.com/docopt/docopt-go"
+	"github.com/mcandre/go-chop"
 	"github.com/mcandre/flcl"
 	"github.com/monochromegane/go-gitignore"
 )
@@ -50,7 +52,7 @@ func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMat
 	}
 }
 
-func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, root string, charsets []string, foundResult *bool) {
+func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, gitignoreGlobal gitignore.IgnoreMatcher, root string, charsets []string, foundResult *bool) {
 	rootInfo, err := os.Stat(root)
 
 	if err != nil {
@@ -76,12 +78,14 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 
 			for _, childInfo := range childInfos {
 				childRel := path.Join(root, childInfo.Name())
-				process(visited, gitignores, childRel, charsets, foundResult)
+				process(visited, gitignores, gitignoreGlobal, childRel, charsets, foundResult)
 			}
 		} else if rootBase != ".gitmodules" {
-			if gitignoreMatcher == nil || !gitignoreMatcher.Match(root, false) {
-				*foundResult = true
-				fmt.Printf("%s\n", root)
+			if gitignoreGlobal == nil || !gitignoreGlobal.Match(root, false) {
+				if gitignoreMatcher == nil || !gitignoreMatcher.Match(root, false) {
+					*foundResult = true
+					fmt.Printf("%s\n", root)
+				}
 			}
 		}
 	}
@@ -101,12 +105,23 @@ func main() {
 	visited := make(map[string]bool)
 	gitignores := make(map[string]gitignore.IgnoreMatcher)
 
+	gitConfigCommand := exec.Command("git", "config", "--global", "core.excludesfile")
+	gitConfigCommand.Stderr = os.Stderr
+	gitignoreGlobalPathBytes, err := gitConfigCommand.Output()
+	var gitignoreGlobal gitignore.IgnoreMatcher
+
+	if err != nil {
+		log.Printf("Unable to identify global gitignore: %v\n", err)
+	} else {
+		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)))
+	}
+
 	charsets := strings.Split(charsetCommas, ",")
 
 	foundResult := false
 
 	for _, p := range paths {
-		process(visited, gitignores, p, charsets, &foundResult)
+		process(visited, gitignores, gitignoreGlobal, p, charsets, &foundResult)
 	}
 
 	if !foundResult {

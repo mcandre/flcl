@@ -4,3 +4,6 @@
 [submodule "vendor/github.com/monochromegane/go-gitignore"]
 	path = vendor/github.com/monochromegane/go-gitignore
 	url = git@github.com:monochromegane/go-gitignore.git
+[submodule "vendor/github.com/mcandre/go-chop"]
+	path = vendor/github.com/mcandre/go-chop
+	url = git@github.com:mcandre/go-chop.git
