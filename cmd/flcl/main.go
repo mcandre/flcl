@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/docopt/docopt-go"
@@ -92,7 +93,15 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 			if gitignoreGlobal == nil || !gitignoreGlobal.Match(rootRel, false) {
 				if gitignoreMatcher == nil || !gitignoreMatcher.Match(rootRel, false) {
 					*foundResult = true
-					fmt.Printf("%s\n", root)
+
+					var rootQuoted string
+					if strings.ContainsAny(root, " '\"") {
+						rootQuoted = strconv.Quote(root)
+					} else {
+						rootQuoted = root
+					}
+
+					fmt.Printf("%s\n", rootQuoted)
 				}
 			}
 		}
