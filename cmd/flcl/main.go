@@ -33,13 +33,23 @@ const Usage = `Usage:
     -v --version              Show version information
 `
 
-const CurrentDir = "."
+const OriginDir = "/"
+
+//
+// Work around go-gitignore's overly strict directory trailing slash semantics
+//
+func flexibleMatch(ignores gitignore.IgnoreMatcher, root string) bool {
+	return ignores == nil ||
+		(!ignores.Match(root, false) &&
+			!ignores.Match(root, true) &&
+			!ignores.Match(root + "/", true))
+}
 
 func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, dir string) {
 	if !visited[dir] {
 		candidate := path.Join(dir, ".gitignore")
 
-		gitignoreMatcher, err := gitignore.NewGitIgnore(candidate, CurrentDir)
+		gitignoreMatcher, err := gitignore.NewGitIgnore(candidate, OriginDir)
 
 		if err != nil {
 			parent := path.Dir(dir)
@@ -71,38 +81,37 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	gitignoreMatcher := gitignores[parent]
 
 	rootBase := path.Base(root)
-	rootRel, err := filepath.Rel(CurrentDir, root)
+
+	rootAbs, err := filepath.Abs(root)
 
 	if err != nil {
 		panic(err)
 	}
 
-	if gitignoreMatcher == nil || !gitignoreMatcher.Match(rootRel, rootIsDir) {
-		if rootIsDir && rootBase != ".git" {
-			childInfos, err := ioutil.ReadDir(root)
+	if flexibleMatch(gitignoreGlobal, rootAbs) {
+		if flexibleMatch(gitignoreMatcher, rootAbs) {
+			if rootIsDir && rootBase != ".git" {
+				childInfos, err := ioutil.ReadDir(root)
 
-			if err != nil {
-				panic(err)
-			}
-
-			for _, childInfo := range childInfos {
-				childRel := path.Join(root, childInfo.Name())
-				process(visited, gitignores, gitignoreGlobal, childRel, charsets, foundResult)
-			}
-		} else if rootBase != ".gitmodules" {
-			if gitignoreGlobal == nil || !gitignoreGlobal.Match(rootRel, false) {
-				if gitignoreMatcher == nil || !gitignoreMatcher.Match(rootRel, false) {
-					*foundResult = true
-
-					var rootQuoted string
-					if strings.ContainsAny(root, " '\"") {
-						rootQuoted = strconv.Quote(root)
-					} else {
-						rootQuoted = root
-					}
-
-					fmt.Printf("%s\n", rootQuoted)
+				if err != nil {
+					panic(err)
 				}
+
+				for _, childInfo := range childInfos {
+					childRel := path.Join(root, childInfo.Name())
+					process(visited, gitignores, gitignoreGlobal, childRel, charsets, foundResult)
+				}
+			} else if rootBase != ".gitmodules" {
+				*foundResult = true
+
+				var rootQuoted string
+				if strings.ContainsAny(root, " '\"") {
+					rootQuoted = strconv.Quote(root)
+				} else {
+					rootQuoted = root
+				}
+
+				fmt.Printf("%s\n", rootQuoted)
 			}
 		}
 	}
@@ -130,7 +139,7 @@ func main() {
 	if err != nil {
 		log.Printf("Unable to identify global gitignore: %v\n", err)
 	} else {
-		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), CurrentDir)
+		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), OriginDir)
 	}
 
 	charsets := strings.Split(charsetCommas, ",")
