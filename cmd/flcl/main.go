@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/docopt/docopt-go"
@@ -31,11 +32,13 @@ const Usage = `Usage:
     -v --version              Show version information
 `
 
+const CurrentDir = "."
+
 func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, dir string) {
 	if !visited[dir] {
 		candidate := path.Join(dir, ".gitignore")
 
-		gitignoreMatcher, err := gitignore.NewGitIgnore(candidate)
+		gitignoreMatcher, err := gitignore.NewGitIgnore(candidate, CurrentDir)
 
 		if err != nil {
 			parent := path.Dir(dir)
@@ -67,8 +70,13 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	gitignoreMatcher := gitignores[parent]
 
 	rootBase := path.Base(root)
+	rootRel, err := filepath.Rel(CurrentDir, root)
 
-	if gitignoreMatcher == nil || !gitignoreMatcher.Match(root, rootIsDir) {
+	if err != nil {
+		panic(err)
+	}
+
+	if gitignoreMatcher == nil || !gitignoreMatcher.Match(rootRel, rootIsDir) {
 		if rootIsDir && rootBase != ".git" {
 			childInfos, err := ioutil.ReadDir(root)
 
@@ -81,8 +89,8 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 				process(visited, gitignores, gitignoreGlobal, childRel, charsets, foundResult)
 			}
 		} else if rootBase != ".gitmodules" {
-			if gitignoreGlobal == nil || !gitignoreGlobal.Match(root, false) {
-				if gitignoreMatcher == nil || !gitignoreMatcher.Match(root, false) {
+			if gitignoreGlobal == nil || !gitignoreGlobal.Match(rootRel, false) {
+				if gitignoreMatcher == nil || !gitignoreMatcher.Match(rootRel, false) {
 					*foundResult = true
 					fmt.Printf("%s\n", root)
 				}
@@ -113,7 +121,7 @@ func main() {
 	if err != nil {
 		log.Printf("Unable to identify global gitignore: %v\n", err)
 	} else {
-		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)))
+		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), CurrentDir)
 	}
 
 	charsets := strings.Split(charsetCommas, ",")
