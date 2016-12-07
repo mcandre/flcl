@@ -1,0 +1,6 @@
+[submodule "vendor/github.com/docopt/docopt-go"]
+	path = vendor/github.com/docopt/docopt-go
+	url = git@github.com:docopt/docopt-go
+[submodule "vendor/github.com/monochromegane/go-gitignore"]
+	path = vendor/github.com/monochromegane/go-gitignore
+	url = git@github.com:monochromegane/go-gitignore.git
