@@ -6,7 +6,7 @@ VERSION=0.0.1
 all: integration-test
 
 integration-test: bin
-	flcl bin
+	flcl bin 2>&1 | grep 'No results'
 
 govet:
 	go list ./... | grep -v vendor | xargs go vet -v
