@@ -40,9 +40,9 @@ const OriginDir = "/"
 //
 func flexibleMatch(ignores gitignore.IgnoreMatcher, root string) bool {
 	return ignores == nil ||
-		(!ignores.Match(root, false) &&
-			!ignores.Match(root, true) &&
-			!ignores.Match(root + "/", true))
+		!(ignores.Match(root, false) ||
+			ignores.Match(root, true) ||
+			ignores.Match(root + "/", true))
 }
 
 func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, dir string) {
