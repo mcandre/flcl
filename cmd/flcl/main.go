@@ -23,10 +23,7 @@ const Usage = `Usage:
   flcl -v --version
 
   Arguments:
-    <path>                    A file path.
-
-                              - Directories are traversed recursively.
-                              - Nearby .gitignore's are applied.
+    <path>                    A file path. Directories are traversed recursively. Nearby .gitignore's are applied.
   Options:
     -c --charsets <charsets>  Limit results to certain character sets [default: ascii,utf-8]
     -h --help                 Show usage information
