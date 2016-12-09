@@ -85,7 +85,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	rootAbs, err := filepath.Abs(root)
 
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 
 	if flexibleMatch(gitignoreGlobal, rootAbs) {
@@ -94,7 +94,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 				childInfos, err := ioutil.ReadDir(root)
 
 				if err != nil {
-					panic(err)
+					log.Panic(err)
 				}
 
 				for _, childInfo := range childInfos {
@@ -118,11 +118,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 }
 
 func main() {
-	arguments, err := docopt.Parse(Usage, nil, true, flcl.Version, false)
-
-	if err != nil {
-		panic(Usage)
-	}
+	arguments, _ := docopt.Parse(Usage, nil, true, flcl.Version, false)
 
 	paths, _ := arguments["<path>"].([]string)
 
