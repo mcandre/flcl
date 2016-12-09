@@ -67,8 +67,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	rootInfo, err := os.Stat(root)
 
 	if err != nil {
-		log.Printf("Cannot access path: %s\n", root)
-		return
+		log.Panic(err)
 	}
 
 	rootIsDir := rootInfo.IsDir()
@@ -108,7 +107,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 					rootQuoted = root
 				}
 
-				fmt.Printf("%s\n", rootQuoted)
+				fmt.Println(rootQuoted)
 			}
 		}
 	}
@@ -130,7 +129,7 @@ func main() {
 	var gitignoreGlobal gitignore.IgnoreMatcher
 
 	if err != nil {
-		log.Printf("Unable to identify global gitignore: %v\n", err)
+		log.Println(err)
 	} else {
 		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), OriginDir)
 	}
@@ -144,6 +143,6 @@ func main() {
 	}
 
 	if !foundResult {
-		log.Printf("No results")
+		log.Println("No results")
 	}
 }
