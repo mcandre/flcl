@@ -20,10 +20,13 @@ gofmt:
 goimport:
 	find . -path '*/vendor/*' -prune -o -name '*.go' -type f -exec goimports -w {} \;
 
+errcheck:
+	find . -path '*/vendor/*' -prune -o -name '*.go' -type f -exec errcheck {} \;
+
 editorconfig:
 	sh editorconfig.sh
 
-lint: govet golint gofmt goimport
+lint: govet golint gofmt goimport errcheck editorconfig
 
 port: archive-ports
 
