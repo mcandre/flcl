@@ -1,3 +1,4 @@
+// Package main provides an executable for running content-aware flcl searches, like UNIX find.
 package main
 
 import (
@@ -12,11 +13,12 @@ import (
 	"strings"
 
 	"github.com/docopt/docopt-go"
-	"github.com/mcandre/go-chop"
 	"github.com/mcandre/flcl"
+	"github.com/mcandre/go-chop"
 	"github.com/monochromegane/go-gitignore"
 )
 
+// Usage is a docopt-formatted specification of the command line syntax for this application.
 const Usage = `Usage:
   flcl [options] <path>...
   flcl -h --help
@@ -30,18 +32,18 @@ const Usage = `Usage:
     -v --version              Show version information
 `
 
+// OriginDir presents a base case for recursive file walking: the root directory.
 const OriginDir = "/"
 
-//
-// Work around go-gitignore's overly strict directory trailing slash semantics
-//
+// flexibleMatch works around go-gitignore's quite strict directory trailing slash semantics.
 func flexibleMatch(ignores gitignore.IgnoreMatcher, root string) bool {
 	return ignores == nil ||
 		!(ignores.Match(root, false) ||
 			ignores.Match(root, true) ||
-			ignores.Match(root + "/", true))
+			ignores.Match(root+"/", true))
 }
 
+// populate identifies the gitignore patterns to apply for some directory path, falling back on parent directory patterns, when available.
 func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, dir string) {
 	if !visited[dir] {
 		candidate := path.Join(dir, ".gitignore")
@@ -63,6 +65,7 @@ func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMat
 	}
 }
 
+// process recursively identifies viable file paths, omitting those that would be ignored by git.
 func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, gitignoreGlobal gitignore.IgnoreMatcher, root string, charsets []string, foundResult *bool) {
 	rootInfo, err := os.Stat(root)
 
@@ -113,6 +116,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	}
 }
 
+// main is the command line entry point for launching flcl commands.
 func main() {
 	arguments, _ := docopt.Parse(Usage, nil, true, flcl.Version, false)
 
