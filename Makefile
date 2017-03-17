@@ -9,7 +9,7 @@ integration-test: bin
 	flcl bin 2>&1 | grep 'No results'
 
 govet:
-	go list ./... | grep -v vendor | xargs go vet -v
+	find . -path "*/vendor*" -prune -o -name "*.go" -type f -exec go tool vet -shadow {} \;
 
 golint:
 	find . -path '*/vendor/*' -prune -o -name '*.go' -type f -exec golint {} \;
