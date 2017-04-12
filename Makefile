@@ -21,7 +21,7 @@ goimport:
 	find . -path '*/vendor/*' -prune -o -name '*.go' -type f -exec goimports -w {} \;
 
 errcheck:
-	find . -path '*/vendor/*' -prune -o -name '*.go' -type f -exec errcheck {} \;
+	errcheck
 
 editorconfig:
 	sh editorconfig.sh
