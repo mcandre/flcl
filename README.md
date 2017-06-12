@@ -30,18 +30,13 @@ editorconfig.sh
 flcl.go
 package.json
 
-$ flcl -h
-Usage:
-  flcl [options] <path>...
-  flcl -h --help
-  flcl -v --version
-
-  Arguments:
-    <path>                    A file path. Directories are traversed recursively. Nearby .gitignore's are applied.
-  Options:
-    -c --charsets <charsets>  Limit results to certain character sets [default: ascii,utf-8]
-    -h --help                 Show usage information
-    -v --version              Show version information
+$ flcl -help
+  -charsets string
+        Limit results to comma-separated character sets (default "ascii,utf-8")
+  -help
+        Show usage information
+  -version
+        Show version information
 ```
 
 # DOWNLOADS

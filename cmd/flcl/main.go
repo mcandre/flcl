@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,25 +13,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/docopt/docopt-go"
 	"github.com/mcandre/flcl"
 	"github.com/mcandre/go-chop"
 	"github.com/monochromegane/go-gitignore"
 )
 
-// Usage is a docopt-formatted specification of the command line syntax for this application.
-const Usage = `Usage:
-  flcl [options] <path>...
-  flcl -h --help
-  flcl -v --version
-
-  Arguments:
-    <path>                    A file path. Directories are traversed recursively. Nearby .gitignore's are applied.
-  Options:
-    -c --charsets <charsets>  Limit results to certain character sets [default: ascii,utf-8]
-    -h --help                 Show usage information
-    -v --version              Show version information
-`
+var flagCharsets = flag.String("charsets", "ascii,utf-8", "Limit results to comma-separated character sets")
+var flagHelp = flag.Bool("help", false, "Show usage information")
+var flagVersion = flag.Bool("version", false, "Show version information")
 
 // OriginDir presents a base case for recursive file walking: the root directory.
 const OriginDir = "/"
@@ -118,11 +108,18 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 
 // main is the command line entry point for launching flcl commands.
 func main() {
-	arguments, _ := docopt.Parse(Usage, nil, true, flcl.Version, false)
+	flag.Parse()
 
-	paths, _ := arguments["<path>"].([]string)
+	switch {
+	case *flagVersion:
+		fmt.Println(flcl.Version)
+		os.Exit(0)
+	case *flagHelp:
+		flag.PrintDefaults()
+		os.Exit(1)
+	}
 
-	charsetCommas, _ := arguments["--charsets"].(string)
+	paths := flag.Args()
 
 	visited := make(map[string]bool)
 	gitignores := make(map[string]gitignore.IgnoreMatcher)
@@ -138,7 +135,7 @@ func main() {
 		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), OriginDir)
 	}
 
-	charsets := strings.Split(charsetCommas, ",")
+	charsets := strings.Split(*flagCharsets, ",")
 
 	foundResult := false
 
