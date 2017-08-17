@@ -23,10 +23,18 @@ goimport:
 errcheck:
 	errcheck -blank
 
+opennota-check:
+	aligncheck
+	structcheck
+	varcheck
+
+megacheck:
+	megacheck
+
 editorconfig:
 	sh editorconfig.sh
 
-lint: govet golint gofmt goimport errcheck editorconfig
+lint: govet golint gofmt goimport errcheck opennota-check megacheck editorconfig
 
 port: archive-ports
 
