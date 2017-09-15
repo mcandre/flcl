@@ -76,7 +76,7 @@ $ go get github.com/mcandre/flcl/...
 
 ```
 $ mkdir -p $GOPATH/src/github.m/mcandre
-$ git clone git@github.com:mcandre/go-chop.git $GOPATH/src/github.com/mcandre/go-chop
+$ git clone https://github.com/mcandre/flcl.git $GOPATH/src/github.com/mcandre/go-chop
 $ sh -c "cd $GOPATH/src/github.com/mcandre/go-chop/cmd/chop && go install"
 $ sh -c "cd $GOPATH/src/github.com/mcandre/go-chop/cmd/chomp && go install"
 ```
