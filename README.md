@@ -58,6 +58,7 @@ https://godoc.org/github.com/mcandre/flcl
 * [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports) (e.g. `go get golang.org/x/tools/cmd/goimports`)
 * [golint](https://github.com/golang/lint) (e.g. `go get github.com/golang/lint/golint`)
 * [errcheck](https://github.com/kisielk/errcheck) (e.g. `go get github.com/kisielk/errcheck`)
+* [nakedret](https://github.com/alexkohler/nakedret) (e.g. `go get github.com/alexkohler/nakedret`)
 * [opennota/check](https://github.com/opennota/check) (e.g. `go get github.com/opennota/check/cmd/...`)
 * [megacheck](https://github.com/dominikh/go-tools/tree/master/cmd/megacheck) (e.g. `go get github.com/dominikh/go-tools/cmd/megacheck`)
 * [gox](https://github.com/mitchellh/gox) (e.g. `go get github.com/mitchellh/gox`)

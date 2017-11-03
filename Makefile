@@ -23,6 +23,9 @@ goimport:
 errcheck:
 	errcheck -blank
 
+nakedret:
+	nakedret -l 0 ./...
+
 opennota-check:
 	aligncheck
 	structcheck
@@ -34,7 +37,7 @@ megacheck:
 editorconfig:
 	sh editorconfig.sh
 
-lint: govet golint gofmt goimport errcheck opennota-check megacheck editorconfig
+lint: govet golint gofmt goimport errcheck nakedret opennota-check megacheck editorconfig
 
 port: archive-ports
 
