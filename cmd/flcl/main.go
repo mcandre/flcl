@@ -22,39 +22,6 @@ var flagCharsets = flag.String("charsets", "ascii,utf-8", "Limit results to comm
 var flagHelp = flag.Bool("help", false, "Show usage information")
 var flagVersion = flag.Bool("version", false, "Show version information")
 
-// OriginDir presents a base case for recursive file walking: the root directory.
-const OriginDir = "/"
-
-// flexibleMatch works around go-gitignore's quite strict directory trailing slash semantics.
-func flexibleMatch(ignores gitignore.IgnoreMatcher, root string) bool {
-	return ignores == nil ||
-		!(ignores.Match(root, false) ||
-			ignores.Match(root, true) ||
-			ignores.Match(root+"/", true))
-}
-
-// populate identifies the gitignore patterns to apply for some directory path, falling back on parent directory patterns, when available.
-func populate(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, dir string) {
-	if !visited[dir] {
-		candidate := path.Join(dir, ".gitignore")
-
-		gitignoreMatcher, err := gitignore.NewGitIgnore(candidate, OriginDir)
-
-		if err != nil {
-			parent := path.Dir(dir)
-
-			if parent != dir {
-				populate(visited, gitignores, parent)
-				gitignores[dir] = gitignores[parent]
-			}
-		} else {
-			gitignores[dir] = gitignoreMatcher
-		}
-
-		visited[dir] = true
-	}
-}
-
 // process recursively identifies viable file paths, omitting those that would be ignored by git.
 func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatcher, gitignoreGlobal gitignore.IgnoreMatcher, root string, charsets []string, foundResult *bool) {
 	rootInfo, err := os.Stat(root)
@@ -66,7 +33,7 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 	rootIsDir := rootInfo.IsDir()
 
 	parent := path.Dir(root)
-	populate(visited, gitignores, parent)
+	flcl.Populate(visited, gitignores, parent)
 	gitignoreMatcher := gitignores[parent]
 
 	rootBase := path.Base(root)
@@ -77,8 +44,8 @@ func process(visited map[string]bool, gitignores map[string]gitignore.IgnoreMatc
 		log.Panic(err)
 	}
 
-	if flexibleMatch(gitignoreGlobal, rootAbs) {
-		if flexibleMatch(gitignoreMatcher, rootAbs) {
+	if flcl.FlexibleMatch(gitignoreGlobal, rootAbs) {
+		if flcl.FlexibleMatch(gitignoreMatcher, rootAbs) {
 			if rootIsDir && rootBase != ".git" {
 				childInfos, err := ioutil.ReadDir(root)
 
@@ -132,7 +99,7 @@ func main() {
 	if err != nil {
 		log.Println(err)
 	} else {
-		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), OriginDir)
+		gitignoreGlobal, _ = gitignore.NewGitIgnore(chop.Chomp(string(gitignoreGlobalPathBytes)), flcl.OriginDir)
 	}
 
 	charsets := strings.Split(*flagCharsets, ",")
