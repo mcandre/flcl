@@ -8,7 +8,7 @@ import (
 )
 
 // Version is semver.
-const Version = "0.0.3"
+const Version = "0.0.4"
 
 // OriginDir presents a base case for recursive file walking: the root directory.
 const OriginDir = "/"
