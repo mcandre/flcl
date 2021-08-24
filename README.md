@@ -51,56 +51,12 @@ https://godoc.org/github.com/mcandre/flcl
 
 (None)
 
-# BUILDTIME REQUIREMENTS
-
-* [Go](https://golang.org/) 1.11+
-
-## Recommended
-
-* [Docker](https://www.docker.com/)
-* [Mage](https://magefile.org/) (e.g., `go get github.com/magefile/mage`)
-* [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports) (e.g. `go get golang.org/x/tools/cmd/goimports`)
-* [golint](https://github.com/golang/lint) (e.g. `go get github.com/golang/lint/golint`)
-* [errcheck](https://github.com/kisielk/errcheck) (e.g. `go get github.com/kisielk/errcheck`)
-* [nakedret](https://github.com/alexkohler/nakedret) (e.g. `go get github.com/alexkohler/nakedret`)
-* [shadow](golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow) (e.g. `go get -u golang.org/x/tools/go/analysis/passes/shadow/cmd/shadow`)
-* [goxcart](https://github.com/mcandre/goxcart) (e.g., `github.com/mcandre/goxcart/...`)
-* [zipc](https://github.com/mcandre/zipc) (e.g. `go get github.com/mcandre/zipc/...`)
-
-# INSTALL FROM REMOTE GIT REPOSITORY
+# INSTALL FROM SOURCE
 
 ```console
-$ go get github.com/mcandre/flcl/...
+$ go install github.com/mcandre/flcl/cmd/flcl@latest
 ```
 
-(Yes, include the ellipsis as well, it's the magic Go syntax for downloading, building, and installing all components of a package, including any libraries and command line tools.)
+# CONTRIBUTING
 
-# INSTALL FROM LOCAL GIT REPOSITORY
-
-```console
-$ mkdir -p $GOPATH/src/github.m/mcandre
-$ git clone https://github.com/mcandre/flcl.git $GOPATH/src/github.com/mcandre/flcl
-$ cd "$GOPATH/src/github.com/mcandre/flcl"
-$ git submodule update --init --recursive
-$ go install
-```
-
-# INTEGRATION TEST
-
-```console
-$ mage test
-```
-
-# PORT
-
-```console
-$ mage port
-```
-
-# LINT
-
-Keep the code tidy:
-
-```console
-$ mage lint
-```
+For more information on developing flcl itself, see [DEVELOPMENT.md](DEVELOPMENT.md).

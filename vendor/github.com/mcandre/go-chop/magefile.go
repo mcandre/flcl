@@ -1,19 +1,15 @@
-//go:build mage
 // +build mage
 
 package main
 
 import (
 	"bufio"
-	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/magefile/mage/mg"
-	"github.com/mcandre/flcl"
+	"github.com/mcandre/go-chop"
 	"github.com/mcandre/mage-extras"
 )
 
@@ -27,31 +23,39 @@ var Default = Test
 func Test() error {
 	mg.Deps(Install)
 
-	if err := os.MkdirAll(artifactsPath, os.ModeDir|0775); err != nil {
+	exampleFilename := "example.txt"
+
+	exampleFileChop, err := os.Open(exampleFilename)
+
+	if err != nil {
 		return err
 	}
 
-	var out bytes.Buffer
+	cmdChop := exec.Command("chop")
+	cmdChop.Stdin = bufio.NewReader(exampleFileChop)
+	cmdChop.Stdout = os.Stdout
+	cmdChop.Stderr = os.Stderr
 
-	cmd := exec.Command("flcl", "bin")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = bufio.NewWriter(&out)
-
-	if err := cmd.Run(); err != nil {
+	if err := cmdChop.Run(); err != nil {
 		return err
 	}
 
-	errorOutput := out.String()
+	exampleFileChomp, err := os.Open(exampleFilename)
 
-	if !strings.Contains(errorOutput, "No results") {
-		return errors.New(fmt.Sprintf("Expected \"No results\", got %v", errorOutput))
+	if err != nil {
+		return err
 	}
 
-	return nil
+	cmdChomp := exec.Command("chomp")
+	cmdChomp.Stdin = bufio.NewReader(exampleFileChomp)
+	cmdChomp.Stdout = os.Stdout
+	cmdChomp.Stderr = os.Stderr
+
+	return cmdChomp.Run()
 }
 
-// GoVet runs go vet with shadow checks enabled.
-func GoVet() error { return mageextras.GoVetShadow() }
+// GoVet runs go tool vet.
+func GoVet() error { return mageextras.GoVet("-shadow") }
 
 // GoLint runs golint.
 func GoLint() error { return mageextras.GoLint() }
@@ -80,22 +84,30 @@ func Lint() error {
 }
 
 // portBasename labels the artifact basename.
-var portBasename = fmt.Sprintf("flcl-%s", flcl.Version)
+var portBasename = fmt.Sprintf("chop-%s", chop.Version)
 
 // repoNamespace identifies the Go namespace for this project.
-var repoNamespace = "github.com/mcandre/flcl"
+var repoNamespace = "github.com/mcandre/go-chop"
 
-// Factorio cross-compiles Go binaries for a multitude of platforms.
-func Factorio() error { return mageextras.Factorio(portBasename) }
+// Goxcart cross-compiles Go binaries with additional targets enabled.
+func Goxcart() error {
+	return mageextras.Goxcart(
+		artifactsPath,
+		"-repo",
+		repoNamespace,
+		"-banner",
+		portBasename,
+	)
+}
 
 // Port builds and compresses artifacts.
-func Port() error { mg.Deps(Factorio); return mageextras.Archive(portBasename, artifactsPath) }
+func Port() error { mg.Deps(Goxcart); return mageextras.Archive(portBasename, artifactsPath) }
 
 // Install builds and installs Go applications.
 func Install() error { return mageextras.Install() }
 
 // Uninstall deletes installed Go applications.
-func Uninstall() error { return mageextras.Uninstall("flcl") }
+func Uninstall() error { return mageextras.Uninstall("chop", "chomp") }
 
 // Clean deletes artifacts.
 func Clean() error { return os.RemoveAll(artifactsPath) }
